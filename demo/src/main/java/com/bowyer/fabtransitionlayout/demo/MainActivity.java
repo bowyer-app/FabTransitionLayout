@@ -2,6 +2,8 @@ package com.bowyer.fabtransitionlayout.demo;
 
 import com.bowyer.app.fabtransitionlayout.BottomSheetLayout;
 import com.bowyer.app.fabtransitionlayout.FooterLayout;
+import com.bowyer.fabtransitionlayout.demo.adapter.BottomSheetAdapter;
+import com.bowyer.fabtransitionlayout.demo.model.BottomSheet;
 import com.github.ksoichiro.android.observablescrollview.ObservableListView;
 import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks;
 import com.github.ksoichiro.android.observablescrollview.ScrollState;
@@ -9,6 +11,7 @@ import com.github.ksoichiro.android.observablescrollview.ScrollState;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBarActivity;
@@ -29,22 +32,28 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
 
     @InjectView(R.id.list_view)
     ObservableListView mObservableListView;
+
     @InjectView(R.id.fabtoolbar)
     FooterLayout mFabToolbar;
+
     @InjectView(R.id.fablist)
     BottomSheetLayout mFooterLayout;
+
     @InjectView(R.id.list_menu)
     ListView mListView;
 
     @InjectView(R.id.fab)
     FloatingActionButton mFab;
+
     @InjectView(R.id.fab_left)
     FloatingActionButton mFabLeft;
 
     @InjectView(R.id.ic_call)
     ImageView mIcCall;
+
     @InjectView(R.id.ic_email)
     ImageView mIcEmail;
+
     @InjectView(R.id.ic_forum)
     ImageView mIcForum;
 
@@ -59,16 +68,24 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
         mFooterLayout.setFab(mFabLeft);
     }
 
-    private void initListMenu(){
-        List<String> menu = new ArrayList<>();
-        menu.add("Share");
-        menu.add("Upload");
-        menu.add("Fav");
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, menu);
+    private void callBottomSheetActivity() {
+        Intent intet = new Intent(this, BottomSheetDemoActivity.class);
+        startActivity(intet);
+    }
+
+    private void initListMenu() {
+        ArrayList<BottomSheet> bottomSheets = new ArrayList<>();
+        bottomSheets.add(
+                BottomSheet.to().setBottomSheetMenuType(BottomSheet.BottomSheetMenuType.EMAIL));
+        bottomSheets.add(
+                BottomSheet.to().setBottomSheetMenuType(BottomSheet.BottomSheetMenuType.ACCOUNT));
+        bottomSheets.add(
+                BottomSheet.to().setBottomSheetMenuType(BottomSheet.BottomSheetMenuType.SETTING));
+        BottomSheetAdapter adapter = new BottomSheetAdapter(this, bottomSheets);
         mListView.setAdapter(adapter);
 
     }
+
     private void initListView() {
         List<String> list = new ArrayList<String>(100);
         for (int i = 0; i < 100; i++) {
@@ -108,8 +125,9 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
     }
 
     @OnClick(R.id.fab_left)
-    void onFabLeftClick(){
-        mFooterLayout.expandFab();
+    void onFabLeftClick() {
+        callBottomSheetActivity();
+//        mFooterLayout.expandFab();
     }
 
     @OnClick(R.id.call)
