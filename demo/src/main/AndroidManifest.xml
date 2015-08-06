@@ -17,6 +17,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".BottomSheetDemoActivity"/>
+        <activity android:name=".FabToolBarDemoActivity"/>
     </application>
 
 </manifest>
