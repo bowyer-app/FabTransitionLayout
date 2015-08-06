@@ -1,5 +1,6 @@
 package com.bowyer.fabtransitionlayout.demo;
 
+import com.bowyer.app.fabtransitionlayout.BottomSheetLayout;
 import com.bowyer.app.fabtransitionlayout.FooterLayout;
 import com.github.ksoichiro.android.observablescrollview.ObservableListView;
 import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks;
@@ -8,14 +9,13 @@ import com.github.ksoichiro.android.observablescrollview.ScrollState;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +31,15 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
     ObservableListView mObservableListView;
     @InjectView(R.id.fabtoolbar)
     FooterLayout mFabToolbar;
+    @InjectView(R.id.fablist)
+    BottomSheetLayout mFooterLayout;
+    @InjectView(R.id.list_menu)
+    ListView mListView;
+
     @InjectView(R.id.fab)
     FloatingActionButton mFab;
+    @InjectView(R.id.fab_left)
+    FloatingActionButton mFabLeft;
 
     @InjectView(R.id.ic_call)
     ImageView mIcCall;
@@ -47,9 +54,21 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
         initListView();
+        initListMenu();
         mFabToolbar.setFab(mFab);
+        mFooterLayout.setFab(mFabLeft);
     }
 
+    private void initListMenu(){
+        List<String> menu = new ArrayList<>();
+        menu.add("Share");
+        menu.add("Upload");
+        menu.add("Fav");
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1, menu);
+        mListView.setAdapter(adapter);
+
+    }
     private void initListView() {
         List<String> list = new ArrayList<String>(100);
         for (int i = 0; i < 100; i++) {
@@ -76,14 +95,21 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
     public void onUpOrCancelMotionEvent(ScrollState scrollState) {
         if (scrollState == ScrollState.UP) {
             mFabToolbar.slideOutFab();
+            mFooterLayout.slideOutFab();
         } else if (scrollState == ScrollState.DOWN) {
             mFabToolbar.slideInFab();
+            mFooterLayout.slideInFab();
         }
     }
 
     @OnClick(R.id.fab)
     void onFabClick() {
         mFabToolbar.expandFab();
+    }
+
+    @OnClick(R.id.fab_left)
+    void onFabLeftClick(){
+        mFooterLayout.expandFab();
     }
 
     @OnClick(R.id.call)

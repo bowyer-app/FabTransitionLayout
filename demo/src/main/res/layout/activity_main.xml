@@ -18,11 +18,40 @@
             android:layout_gravity="bottom|end"
             android:layout_marginBottom="32dp"
             android:layout_marginRight="32dp"
+            android:visibility="invisible"
             android:src="@drawable/ic_add_white_24dp"
             app:borderWidth="0dp"
             app:fabSize="normal"
             app:rippleColor="@color/primary"
             />
+    <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginBottom="32dp"
+            android:layout_marginRight="32dp"
+            android:src="@drawable/ic_add_white_24dp"
+            app:borderWidth="0dp"
+            app:fabSize="normal"
+            app:rippleColor="@color/primary"
+            />
+
+    <com.bowyer.app.fabtransitionlayout.BottomSheetLayout
+            android:id="@+id/fablist"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            app:ft_container_gravity="end"
+            app:ft_color="@color/primary">
+
+        <ListView
+                android:id="@+id/list_menu"
+                android:background="@color/primary"
+                android:divider="@null"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+    </com.bowyer.app.fabtransitionlayout.BottomSheetLayout>
 
     <com.bowyer.app.fabtransitionlayout.FooterLayout
             android:id="@+id/fabtoolbar"
