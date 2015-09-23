@@ -1,5 +1,13 @@
 apply plugin: 'com.android.library'
 
+repositories {
+    mavenCentral()
+
+    maven {
+        url "https://jitpack.io"
+    }
+}
+
 android {
     compileSdkVersion COMPILE_SDK_VERSION as int
     buildToolsVersion BUILD_TOOLS_VERSION
@@ -18,7 +26,9 @@ android {
     }
 }
 
+
 dependencies {
-    compile 'com.android.support:appcompat-v7:22.2.0'
+    compile 'com.android.support:appcompat-v7:23.0.1'
+    compile 'com.github.ozodrukh:CircularReveal:1.1.1'
 }
 apply from: 'bintray-publish.gradle'
