@@ -13,18 +13,16 @@ import android.os.Build;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.v4.view.animation.FastOutLinearInInterpolator;
-import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
-import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -32,49 +30,64 @@ import android.widget.LinearLayout;
 import io.codetail.animation.SupportAnimator;
 
 /**
- * Created by Bowyer on 2015/08/04.
+ * Created by Bowyer on 2015/08/05.
  */
-public class FooterLayout extends FrameLayout {
+public class BottomSheetLayout extends FrameLayout implements View.OnTouchListener {
 
     private static final int DEFAULT_ANIMATION_DURATION = 400;
+
     private static final int DEFAULT_FAB_SIZE = 56;
 
     @IntDef({FAB_CIRCLE, FAB_EXPAND})
     private @interface Fab {
 
     }
+
     private static final int FAB_CIRCLE = 0;
+
     private static final int FAB_EXPAND = 1;
 
     int mFabType = FAB_CIRCLE;
+
     boolean mAnimatingFab = false;
 
     private LinearLayout mFabExpandLayout;
+
     private ImageView mFab;
 
+    private View mFakeBg;
+
     private int animationDuration;
+
     private int mFabSize;
 
-    public FooterLayout(Context context) {
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        contractFab();
+        return true;
+    }
+
+    public BottomSheetLayout(Context context) {
         super(context);
         init();
     }
 
-    public FooterLayout(Context context, AttributeSet attrs) {
+    public BottomSheetLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
         loadAttributes(context, attrs);
     }
 
-    public FooterLayout(Context context, AttributeSet attrs, int defStyle) {
+    public BottomSheetLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init();
         loadAttributes(context, attrs);
     }
 
     private void init() {
-        inflate(getContext(), R.layout.footer_layout, this);
+        inflate(getContext(), R.layout.bottom_sheet_layout, this);
         mFabExpandLayout = ((LinearLayout) findViewById(R.id.container));
+        mFakeBg = findViewById(R.id.fake_bg);
     }
 
     private void loadAttributes(Context context, AttributeSet attrs) {
@@ -248,11 +261,13 @@ public class FooterLayout extends FrameLayout {
     }
 
     public void contractFab() {
-        if(!isFabExpanded()){
+        if (!isFabExpanded()) {
             return;
         }
 
         mFabType = FAB_CIRCLE;
+        mFakeBg.setVisibility(INVISIBLE);
+        mFakeBg.setOnTouchListener(null);
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             contractPreLollipop();
@@ -270,9 +285,8 @@ public class FooterLayout extends FrameLayout {
         mAnimatingFab = true;
 
         // Translation vector for the FAB. Basically move it just below the toolbar.
-        float dx = ViewUtils.centerX(mFabExpandLayout) + getFabSizePx() - ViewUtils.centerX(mFab);
-        float dy = ViewUtils.getRelativeTop(mFabExpandLayout) - ViewUtils.getRelativeTop(mFab)
-                - (mFab.getHeight() - getFabSizePx()) / 2;
+        float dx = ViewUtils.centerX(mFabExpandLayout) + mFab.getWidth() - ViewUtils.centerX(mFab);
+        float dy = ViewUtils.centerY(mFabExpandLayout) / 20;
 
         // Center point on the screen of the FAB after translation. Used as the start point
         // for the expansion animation of the toolbar.
@@ -330,6 +344,9 @@ public class FooterLayout extends FrameLayout {
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 mAnimatingFab = false;
+                mFakeBg.setVisibility(VISIBLE);
+                mFakeBg.setOnTouchListener(BottomSheetLayout.this);
+
             }
         });
 
@@ -340,9 +357,8 @@ public class FooterLayout extends FrameLayout {
         mAnimatingFab = true;
 
         // Translation vector for the FAB. Basically move it just below the toolbar.
-        float dx = ViewUtils.centerX(mFabExpandLayout) + getFabSizePx() - ViewUtils.centerX(mFab);
-        float dy = ViewUtils.getRelativeTop(mFabExpandLayout) - ViewUtils.getRelativeTop(mFab)
-                - (mFab.getHeight() - getFabSizePx()) / 2;
+        float dx = ViewUtils.centerX(mFabExpandLayout) + mFab.getWidth() - ViewUtils.centerX(mFab);
+        float dy = ViewUtils.centerY(mFabExpandLayout) / 20;
 
         // Center point on the screen of the FAB after translation. Used as the start point
         // for the expansion animation of the toolbar.
@@ -366,8 +382,9 @@ public class FooterLayout extends FrameLayout {
                 PropertyValuesHolder.ofFloat("translationY", 0f, dy));
         fabSlideYAnim.setDuration(animationDuration / 2);
 
-        final SupportAnimator toolbarExpandAnim = io.codetail.animation.ViewAnimationUtils.createCircularReveal(
-                mFabExpandLayout, x, y, startRadius, endRadius);
+        final SupportAnimator toolbarExpandAnim = io.codetail.animation.ViewAnimationUtils
+                .createCircularReveal(
+                        mFabExpandLayout, x, y, startRadius, endRadius);
         toolbarExpandAnim.setDuration(animationDuration / 2);
 
         // Play slide animations together. Interpolators must be added after playTogether()
@@ -401,6 +418,9 @@ public class FooterLayout extends FrameLayout {
             public void onAnimationEnd() {
                 mFab.setAlpha(1f);
                 mAnimatingFab = false;
+                mFakeBg.setVisibility(VISIBLE);
+                mFakeBg.setOnTouchListener(BottomSheetLayout.this);
+
             }
 
             @Override
@@ -422,9 +442,8 @@ public class FooterLayout extends FrameLayout {
         mAnimatingFab = true;
 
         // Translation vector for the FAB. Basically move it just below the toolbar.
-        float dx = ViewUtils.centerX(mFabExpandLayout) + getFabSizePx() - ViewUtils.centerX(mFab);
-        float dy = ViewUtils.getRelativeTop(mFabExpandLayout) - ViewUtils.getRelativeTop(mFab)
-                - (mFab.getHeight() - getFabSizePx()) / 2;
+        float dx = ViewUtils.centerX(mFabExpandLayout) + mFab.getWidth() - ViewUtils.centerX(mFab);
+        float dy = ViewUtils.centerY(mFabExpandLayout) / 20;
 
         mFab.setAlpha(0f);
         mFab.setTranslationX(dx);
@@ -489,9 +508,8 @@ public class FooterLayout extends FrameLayout {
         mAnimatingFab = true;
 
         // Translation vector for the FAB. Basically move it just below the toolbar.
-        float dx = ViewUtils.centerX(mFabExpandLayout) + getFabSizePx() - ViewUtils.centerX(mFab);
-        float dy = ViewUtils.getRelativeTop(mFabExpandLayout) - ViewUtils.getRelativeTop(mFab)
-                - (mFab.getHeight() - getFabSizePx()) / 2;
+        float dx = ViewUtils.centerX(mFabExpandLayout) + mFab.getWidth() - ViewUtils.centerX(mFab);
+        float dy = ViewUtils.centerY(mFabExpandLayout) / 20;
 
         mFab.setAlpha(0f);
         mFab.setTranslationX(dx);
@@ -517,8 +535,9 @@ public class FooterLayout extends FrameLayout {
                 PropertyValuesHolder.ofFloat("translationY", dy, 0f));
         fabSlideYAnim.setDuration(animationDuration / 2);
 
-        final SupportAnimator toolbarContractAnim = io.codetail.animation.ViewAnimationUtils.createCircularReveal(
-                mFabExpandLayout, x, y, startRadius, endRadius);
+        final SupportAnimator toolbarContractAnim = io.codetail.animation.ViewAnimationUtils
+                .createCircularReveal(
+                        mFabExpandLayout, x, y, startRadius, endRadius);
         toolbarContractAnim.setDuration(animationDuration / 2);
 
         // Play slide animations together. Interpolators must be added after playTogether()
@@ -572,4 +591,3 @@ public class FooterLayout extends FrameLayout {
         return Math.round(mFabSize * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 }
-

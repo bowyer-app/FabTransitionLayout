@@ -3,4 +3,6 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="fab_toolbar_demo">FabToolBarDemo</string>
+    <string name="bottom_sheet_demo">BottomSheetDemo</string>
 </resources>

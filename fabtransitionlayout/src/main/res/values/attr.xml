@@ -8,5 +8,9 @@
             <enum name="center" value="1"/>
             <enum name="end" value="2"/>
         </attr>
+        <attr name="ft_fab_type" format="enum">
+            <enum name="mini" value="40"/>
+            <enum name="normal" value="56"/>
+        </attr>
     </declare-styleable>
 </resources>
