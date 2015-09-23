@@ -1,4 +1,6 @@
 # FabTransitionLayout
+[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-FabTransitionLayout-green.svg?style=flat)](https://android-arsenal.com/details/1/2541)
+
 Provides the Floating Action Button Transition [as specified in the Material Design Guide](http://www.google.com/design/spec/components/buttons-floating-action-button.html#buttons-floating-action-button-transitions) in a simple library.
 
 It is strongly inspired by [fab-toolbar](https://github.com/bowyer-app/fab-toolbar)
