@@ -15,13 +15,19 @@
             android:layout_height="0dp"
             />
 
-    <LinearLayout
-            android:id="@+id/container"
+    <io.codetail.widget.RevealLinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:visibility="invisible"
-            android:elevation="@dimen/elevation"
-            />
+            android:layout_height="wrap_content">
+
+        <LinearLayout
+                android:id="@+id/container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/elevation"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="invisible"/>
+
+    </io.codetail.widget.RevealLinearLayout>
 
 </LinearLayout>
