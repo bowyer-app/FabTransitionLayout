@@ -2,6 +2,7 @@ package com.bowyer.fabtransitionlayout.demo.adapter;
 
 import com.bowyer.fabtransitionlayout.demo.R;
 import com.bowyer.fabtransitionlayout.demo.model.BottomSheet;
+import com.squareup.picasso.Picasso;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -13,8 +14,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 
 /**
  * Created by Bowyer on 15/08/06.
@@ -61,22 +62,21 @@ public class BottomSheetAdapter extends BaseAdapter {
         }
 
         BottomSheet sheet = (BottomSheet) getItem(position);
-        viewHolder.mMenuIcon
-                .setBackground(mContext.getDrawable(sheet.getBottomSheetMenuType().getResId()));
+        Picasso.with(mContext).load(sheet.getBottomSheetMenuType().getResId()).into(viewHolder.mMenuIcon);
         viewHolder.mMenuTitle.setText(sheet.getBottomSheetMenuType().getName());
         return convertView;
     }
 
     static class ViewHolder {
 
-        @InjectView(R.id.menu_icon)
+        @Bind(R.id.menu_icon)
         ImageView mMenuIcon;
 
-        @InjectView(R.id.menu_title)
+        @Bind(R.id.menu_title)
         TextView mMenuTitle;
 
         public ViewHolder(View view) {
-            ButterKnife.inject(this, view);
+            ButterKnife.bind(this, view);
         }
     }
 }

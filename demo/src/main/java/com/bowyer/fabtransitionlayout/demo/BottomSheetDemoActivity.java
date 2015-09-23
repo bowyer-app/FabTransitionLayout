@@ -14,8 +14,8 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import butterknife.OnClick;
 
 /**
@@ -23,23 +23,23 @@ import butterknife.OnClick;
  */
 public class BottomSheetDemoActivity extends ActionBarActivity {
 
-    @InjectView(R.id.list_view)
+    @Bind(R.id.list_view)
     ObservableListView mObservableListView;
 
-    @InjectView(R.id.bottom_sheet)
+    @Bind(R.id.bottom_sheet)
     BottomSheetLayout mBottomSheetLayout;
 
-    @InjectView(R.id.list_menu)
+    @Bind(R.id.list_menu)
     ListView mMenuList;
 
-    @InjectView(R.id.fab)
+    @Bind(R.id.fab)
     FloatingActionButton mFab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bottom_sheet);
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
         initListView();
         initListMenu();
         mBottomSheetLayout.setFab(mFab);

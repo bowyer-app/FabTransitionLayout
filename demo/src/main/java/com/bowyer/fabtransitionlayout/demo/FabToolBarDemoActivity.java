@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
+import butterknife.Bind;
 import butterknife.OnClick;
 
 /**
@@ -27,29 +27,29 @@ import butterknife.OnClick;
  */
 public class FabToolBarDemoActivity extends ActionBarActivity implements ObservableScrollViewCallbacks {
 
-    @InjectView(R.id.list_view)
+    @Bind(R.id.list_view)
     ObservableListView mObservableListView;
 
-    @InjectView(R.id.fabtoolbar)
+    @Bind(R.id.fabtoolbar)
     FooterLayout mFabToolbar;
 
-    @InjectView(R.id.fab)
+    @Bind(R.id.fab)
     FloatingActionButton mFab;
 
-    @InjectView(R.id.ic_call)
+    @Bind(R.id.ic_call)
     ImageView mIcCall;
 
-    @InjectView(R.id.ic_email)
+    @Bind(R.id.ic_email)
     ImageView mIcEmail;
 
-    @InjectView(R.id.ic_forum)
+    @Bind(R.id.ic_forum)
     ImageView mIcForum;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fab_toolbar);
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
         initListView();
         mFabToolbar.setFab(mFab);
     }
