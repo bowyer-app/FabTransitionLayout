@@ -13,4 +13,18 @@
             <enum name="normal" value="56"/>
         </attr>
     </declare-styleable>
+    <declare-styleable name="SheetLayout">
+        <attr name="sheet_color" format="color"/>
+        <attr name="sheet_anim_duration" format="integer"/>
+        <attr name="sheet_container_position" format="enum">
+            <enum name="rightBottom" value="1"/>
+            <enum name="rightTop" value="2"/>
+            <enum name="leftBottom" value="3"/>
+            <enum name="leftTop" value="4"/>
+        </attr>
+        <attr name="sheet_fab_type" format="enum">
+            <enum name="mini" value="40"/>
+            <enum name="normal" value="56"/>
+        </attr>
+    </declare-styleable>
 </resources>

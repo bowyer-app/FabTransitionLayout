@@ -3,4 +3,5 @@
     <dimen name="toolbar_height">56dp</dimen>
     <dimen name="tb_button_margin">16dp</dimen>
     <dimen name="elevation">16dp</dimen>
+    <dimen name="spacing">16dp</dimen>
 </resources>
