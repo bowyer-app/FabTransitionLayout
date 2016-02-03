@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.bowyer.app:fabtransitionlayout:0.2.0@aar'
+    compile 'com.bowyer.app:fabtransitionlayout:0.3.0@aar'
 }
 ```
 
