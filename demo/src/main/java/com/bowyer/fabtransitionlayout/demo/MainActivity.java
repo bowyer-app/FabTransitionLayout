@@ -28,4 +28,9 @@ public class MainActivity extends ActionBarActivity {
         Intent intet = new Intent(this, FabToolBarDemoActivity.class);
         startActivity(intet);
     }
+    @OnClick(R.id.start_coordinator_demo)
+    void startCoordinatorDemo() {
+        Intent intet = new Intent(this, CoordinatorLayoutActivity.class);
+        startActivity(intet);
+    }
 }
