@@ -251,6 +251,9 @@ public class BottomSheetLayout extends FrameLayout implements View.OnTouchListen
     }
 
     public void expandFab() {
+        if (mAnimatingFab) 
+            return;
+            
         mFabType = FAB_EXPAND;
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
