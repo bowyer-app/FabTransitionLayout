@@ -7,44 +7,40 @@ import com.bowyer.fabtransitionlayout.demo.R;
  */
 public class BottomSheet {
 
+  public enum BottomSheetMenuType {
+    EMAIL(R.drawable.ic_drafts_white_24dp, "Mail"), ACCOUNT(R.drawable.ic_account_circle_white_24dp,
+        "Acount"), SETTING(R.drawable.ic_build_white_24dp, "Setitng");
 
-    public enum BottomSheetMenuType {
-        EMAIL(R.drawable.ic_drafts_white_24dp, "Mail"), ACCOUNT(
-                R.drawable.ic_account_circle_white_24dp, "Acount"), SETTING(R.drawable.ic_build_white_24dp,
-                "Setitng");
+    int resId;
 
-        int resId;
+    String name;
 
-        String name;
-
-        BottomSheetMenuType(int resId, String name) {
-            this.resId = resId;
-            this.name = name;
-        }
-
-
-        public int getResId() {
-            return resId;
-        }
-
-        public String getName() {
-            return name;
-        }
+    BottomSheetMenuType(int resId, String name) {
+      this.resId = resId;
+      this.name = name;
     }
 
-    BottomSheetMenuType bottomSheetMenuType;
-
-    public static BottomSheet to() {
-        return new BottomSheet();
+    public int getResId() {
+      return resId;
     }
 
-    public BottomSheetMenuType getBottomSheetMenuType() {
-        return bottomSheetMenuType;
+    public String getName() {
+      return name;
     }
+  }
 
-    public BottomSheet setBottomSheetMenuType(BottomSheetMenuType bottomSheetMenuType) {
-        this.bottomSheetMenuType = bottomSheetMenuType;
-        return this;
-    }
+  BottomSheetMenuType bottomSheetMenuType;
 
+  public static BottomSheet to() {
+    return new BottomSheet();
+  }
+
+  public BottomSheetMenuType getBottomSheetMenuType() {
+    return bottomSheetMenuType;
+  }
+
+  public BottomSheet setBottomSheetMenuType(BottomSheetMenuType bottomSheetMenuType) {
+    this.bottomSheetMenuType = bottomSheetMenuType;
+    return this;
+  }
 }

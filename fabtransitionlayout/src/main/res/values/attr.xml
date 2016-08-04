@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="FooterLayout">
-        <attr name="ft_color" format="color"/>
-        <attr name="ft_anim_duration" format="integer"/>
-        <attr name="ft_container_gravity" format="enum">
-            <enum name="start" value="0"/>
-            <enum name="center" value="1"/>
-            <enum name="end" value="2"/>
-        </attr>
-        <attr name="ft_fab_type" format="enum">
-            <enum name="mini" value="40"/>
-            <enum name="normal" value="56"/>
-        </attr>
-    </declare-styleable>
+  <declare-styleable name="FooterLayout">
+    <attr name="ft_color" format="color"/>
+    <attr name="ft_anim_duration" format="integer"/>
+    <attr name="ft_container_gravity" format="enum">
+      <enum name="start" value="0"/>
+      <enum name="center" value="1"/>
+      <enum name="end" value="2"/>
+    </attr>
+    <attr name="ft_fab_type" format="enum">
+      <enum name="mini" value="40"/>
+      <enum name="normal" value="56"/>
+    </attr>
+  </declare-styleable>
 </resources>
