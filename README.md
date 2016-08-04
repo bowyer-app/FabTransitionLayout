@@ -5,8 +5,9 @@ Provides the Floating Action Button Transition [as specified in the Material Des
 
 It is strongly inspired by [fab-toolbar](https://github.com/bowyer-app/fab-toolbar)
 
-![bottomsheet](https://github.com/bowyer-app/FabTransitionLayout/blob/master/art/bottomsheet.gif)
-![bottomsheet](https://github.com/bowyer-app/FabTransitionLayout/blob/master/art/toolbar.gif)
+| bottomsheet       | toolbar          | CoordinatorLayout|
+| :---------------: |:---------------:| :---------------:|
+|![bottomsheet](https://github.com/bowyer-app/FabTransitionLayout/blob/master/art/bottomsheet.gif)|![bottomsheet](https://github.com/bowyer-app/FabTransitionLayout/blob/master/art/toolbar.gif)|![CoordinatorLayout](https://github.com/bowyer-app/FabTransitionLayout/blob/master/art/CoordinatorLayout.gif)|
 
 Usage
 ====
