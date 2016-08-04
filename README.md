@@ -24,7 +24,7 @@ dependencies {
 
 ### Layout XML
 #### BottomSheetLayout 
-```
+```xml
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:tools="http://schemas.android.com/tools"
              xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -71,7 +71,7 @@ dependencies {
 
 ```
 #### FooterLayout
-```
+```xml
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:tools="http://schemas.android.com/tools"
              xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -142,6 +142,10 @@ mBottomSheetLayout.slideInFab();
 # Credits
 This library use following libraries.
 * [CircularReveal](https://github.com/ozodrukh/CircularReveal)
+
+# Code Style
+
+Follow [SquareAndroid](https://github.com/square/java-code-styles/blob/master/configs/codestyles/SquareAndroid.xml).
 
 Feature
 ====
