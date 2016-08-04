@@ -289,11 +289,11 @@ public class BottomSheetLayout extends FrameLayout implements View.OnTouchListen
     mFabExpandLayout.setVisibility(View.VISIBLE);
 
     Animator fabSlideXAnim = ObjectAnimator.ofPropertyValuesHolder(mFab,
-        PropertyValuesHolder.ofFloat("translationX", 0f, dx));
+        PropertyValuesHolder.ofFloat(View.TRANSLATION_X, 0f, dx));
     fabSlideXAnim.setDuration(animationDuration / 2);
 
     Animator fabSlideYAnim = ObjectAnimator.ofPropertyValuesHolder(mFab,
-        PropertyValuesHolder.ofFloat("translationY", 0f, dy));
+        PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, 0f, dy));
     fabSlideYAnim.setDuration(animationDuration / 2);
 
     Animator toolbarExpandAnim =
@@ -356,11 +356,11 @@ public class BottomSheetLayout extends FrameLayout implements View.OnTouchListen
     mFabExpandLayout.setVisibility(View.VISIBLE);
 
     Animator fabSlideXAnim = ObjectAnimator.ofPropertyValuesHolder(mFab,
-        PropertyValuesHolder.ofFloat("translationX", 0f, dx));
+        PropertyValuesHolder.ofFloat(View.TRANSLATION_X, 0f, dx));
     fabSlideXAnim.setDuration(animationDuration / 2);
 
     Animator fabSlideYAnim = ObjectAnimator.ofPropertyValuesHolder(mFab,
-        PropertyValuesHolder.ofFloat("translationY", 0f, dy));
+        PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, 0f, dy));
     fabSlideYAnim.setDuration(animationDuration / 2);
 
     final SupportAnimator toolbarExpandAnim =
@@ -435,12 +435,12 @@ public class BottomSheetLayout extends FrameLayout implements View.OnTouchListen
         Math.max(y, mFabExpandLayout.getHeight() - y));
 
     Animator fabSlideXAnim = ObjectAnimator.ofPropertyValuesHolder(mFab,
-        PropertyValuesHolder.ofFloat("translationX", dx, 0f));
+        PropertyValuesHolder.ofFloat(View.TRANSLATION_X, dx, 0f));
     fabSlideXAnim.setStartDelay(animationDuration / 2);
     fabSlideXAnim.setDuration(animationDuration / 2);
 
     Animator fabSlideYAnim = ObjectAnimator.ofPropertyValuesHolder(mFab,
-        PropertyValuesHolder.ofFloat("translationY", dy, 0f));
+        PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, dy, 0f));
     fabSlideYAnim.setStartDelay(animationDuration / 2);
     fabSlideYAnim.setDuration(animationDuration / 2);
 
@@ -498,11 +498,11 @@ public class BottomSheetLayout extends FrameLayout implements View.OnTouchListen
         Math.max(y, mFabExpandLayout.getHeight() - y));
 
     Animator fabSlideXAnim = ObjectAnimator.ofPropertyValuesHolder(mFab,
-        PropertyValuesHolder.ofFloat("translationX", dx, 0f));
+        PropertyValuesHolder.ofFloat(View.TRANSLATION_X, dx, 0f));
     fabSlideXAnim.setDuration(animationDuration / 2);
 
     Animator fabSlideYAnim = ObjectAnimator.ofPropertyValuesHolder(mFab,
-        PropertyValuesHolder.ofFloat("translationY", dy, 0f));
+        PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, dy, 0f));
     fabSlideYAnim.setDuration(animationDuration / 2);
 
     final SupportAnimator toolbarContractAnim =
