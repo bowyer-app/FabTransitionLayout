@@ -1,1 +1,1 @@
-include ':demo',  ':fabtransitionlayout'
+include ':demo', ':fabtransitionlayout'
