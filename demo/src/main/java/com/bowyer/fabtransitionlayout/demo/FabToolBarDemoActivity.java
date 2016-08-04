@@ -91,8 +91,8 @@ public class FabToolBarDemoActivity extends ActionBarActivity
 
   private void iconAnim(View icon) {
     Animator iconAnim = ObjectAnimator.ofPropertyValuesHolder(icon,
-        PropertyValuesHolder.ofFloat("scaleX", 1f, 1.5f, 1f),
-        PropertyValuesHolder.ofFloat("scaleY", 1f, 1.5f, 1f));
+        PropertyValuesHolder.ofFloat(View.SCALE_X, 1f, 1.5f, 1f),
+        PropertyValuesHolder.ofFloat(View.SCALE_Y, 1f, 1.5f, 1f));
     iconAnim.start();
   }
 }

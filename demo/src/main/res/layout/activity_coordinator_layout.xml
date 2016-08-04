@@ -35,21 +35,82 @@
       android:id="@+id/fab"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      app:layout_anchor="@id/list_view"
-      app:layout_anchorGravity="bottom|end"
       android:layout_margin="@dimen/fab_margin"
       android:src="@drawable/ic_add_white_24dp"
+      app:layout_anchor="@id/list_view"
+      app:layout_anchorGravity="bottom|end"
       />
 
   <com.bowyer.app.fabtransitionlayout.FooterLayout
       android:id="@+id/fabtoolbar"
       android:layout_width="match_parent"
-      android:layout_height="56dp"
+      android:layout_height="@dimen/toolbar_height"
+      app:ft_color="@color/primary"
+      app:ft_container_gravity="center"
       app:layout_anchor="@id/list_view"
       app:layout_anchorGravity="bottom"
-      app:ft_container_gravity="center"
-      app:ft_color="@color/primary"
       >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        >
+
+      <RelativeLayout
+          android:id="@+id/call"
+          android:layout_width="0dp"
+          android:layout_height="match_parent"
+          android:layout_weight="1"
+          android:gravity="center"
+          >
+
+        <ImageView
+            android:id="@+id/ic_call"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_centerHorizontal="true"
+            android:scaleType="center"
+            android:src="@drawable/ic_call_white_36dp"
+            />
+      </RelativeLayout>
+
+      <RelativeLayout
+          android:id="@+id/email"
+          android:layout_width="0dp"
+          android:layout_height="match_parent"
+          android:layout_weight="1"
+          android:gravity="center"
+          >
+
+        <ImageView
+            android:id="@+id/ic_email"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_centerHorizontal="true"
+            android:scaleType="center"
+            android:src="@drawable/ic_email_white_36dp"
+            />
+      </RelativeLayout>
+
+      <RelativeLayout
+          android:id="@+id/forum"
+          android:layout_width="0dp"
+          android:layout_height="match_parent"
+          android:layout_weight="1"
+          android:gravity="center"
+          >
+
+        <ImageView
+            android:id="@+id/ic_forum"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_centerHorizontal="true"
+            android:scaleType="center"
+            android:src="@drawable/ic_forum_white_36dp"
+            />
+      </RelativeLayout>
+    </LinearLayout>
   </com.bowyer.app.fabtransitionlayout.FooterLayout>
 
 </android.support.design.widget.CoordinatorLayout>
