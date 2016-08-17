@@ -12,7 +12,6 @@ import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.v4.view.animation.FastOutLinearInInterpolator;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -59,6 +58,12 @@ import io.codetail.animation.ViewAnimationUtils;
   private boolean mExpandWithAlphaAnim;
   private float mAnimationFabAlphaFrom = 1f;
   private float mAnimationFabAlphaTo = 0f;
+
+  private int mLastVerticalOffset;
+  private int mLastRecyclerDy;
+
+  private Runnable mOnCollapse;
+  private Runnable mOnExpand;
 
   public FooterLayout(Context context) {
     super(context);
@@ -186,30 +191,7 @@ import io.codetail.animation.ViewAnimationUtils;
   public void slideInFab() {
     if (isFabExpanded()) {
       contractFab();
-      return;
     }
-
-    //todo: wtf?
-    ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) mFab.getLayoutParams();
-    float dy = mFab.getHeight() + lp.bottomMargin;
-    if (mFab.getTranslationY() != dy) {
-      return;
-    }
-
-    mAnimatingFab = true;
-    mFab.setVisibility(View.VISIBLE);
-    mFab.animate()
-        .setStartDelay(0)
-        .setDuration(200)
-        .setInterpolator(new FastOutLinearInInterpolator())
-        .translationY(0f)
-        .setListener(new AnimatorListenerAdapter() {
-          @Override public void onAnimationEnd(final Animator animation) {
-            super.onAnimationEnd(animation);
-            mAnimatingFab = false;
-          }
-        })
-        .start();
   }
 
   /**
@@ -218,28 +200,7 @@ import io.codetail.animation.ViewAnimationUtils;
   public void slideOutFab() {
     if (isFabExpanded()) {
       contractFab();
-      return;
     }
-
-    ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) mFab.getLayoutParams();
-    if (mFab.getTranslationY() != 0f) {
-      return;
-    }
-
-    mAnimatingFab = true;
-    mFab.animate()
-        .setStartDelay(0)
-        .setDuration(200)
-        .setInterpolator(new FastOutLinearInInterpolator())
-        .translationY(mFab.getHeight() + lp.bottomMargin)
-        .setListener(new AnimatorListenerAdapter() {
-          @Override public void onAnimationEnd(final Animator animation) {
-            super.onAnimationEnd(animation);
-            mAnimatingFab = false;
-            mFab.setVisibility(View.INVISIBLE);
-          }
-        })
-        .start();
   }
 
   /**
@@ -425,14 +386,24 @@ import io.codetail.animation.ViewAnimationUtils;
 
   /**
    * Bind a FAB to expand on click
-   *
-   * @param v a FAB
    */
   public void bindFab(@NonNull ImageView v) {
+    bindFab(v, null);
+  }
+
+  /**
+   * Bind a FAB to expand on click
+   */
+  public void bindFab(@NonNull ImageView v, Runnable onExpand) {
     setFab(v);
+    setOnExpandListener(onExpand);
+
     mFab.setOnClickListener(new OnClickListener() {
       @Override public void onClick(View view) {
         if (!isFabExpanded()) {
+          if (mOnExpand != null) {
+            mOnExpand.run();
+          }
           expandFab();
         }
       }
@@ -443,6 +414,15 @@ import io.codetail.animation.ViewAnimationUtils;
    * Bind a ListView to slide into the FAB after scrolling
    */
   public void bindListView(@NonNull ListView v) {
+    bindListView(v, null);
+  }
+
+  /**
+   * Bind a ListView to slide into the FAB after scrolling
+   */
+  public void bindListView(@NonNull ListView v, Runnable onCollapse) {
+    setOnCollapseListener(onCollapse);
+
     v.setOnScrollListener(new AbsListView.OnScrollListener() {
       @Override public void onScrollStateChanged(AbsListView absListView, int scrollState) {
       }
@@ -459,10 +439,22 @@ import io.codetail.animation.ViewAnimationUtils;
    * Bind a RecyclerView to slide into the FAB after scrolling
    */
   public void bindRecyclerView(@NonNull RecyclerView v) {
+    bindRecyclerView(v, null);
+  }
+
+  /**
+   * Bind a RecyclerView to slide into the FAB after scrolling
+   */
+  public void bindRecyclerView(@NonNull RecyclerView v, Runnable onCollapse) {
+    setOnCollapseListener(onCollapse);
+
     v.addOnScrollListener(new RecyclerView.OnScrollListener() {
       @Override public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
         super.onScrolled(recyclerView, dx, dy);
-        collapseFooterLayout();
+        if (dy != mLastRecyclerDy) {
+          mLastRecyclerDy = dy;
+          collapseFooterLayout();
+        }
       }
     });
   }
@@ -471,9 +463,21 @@ import io.codetail.animation.ViewAnimationUtils;
    * Bind an AppBarLayout to slide into the FAB after scrolling
    */
   public void bindAppBarLayout(@NonNull AppBarLayout v) {
+    bindAppBarLayout(v, null);
+  }
+
+  /**
+   * Bind an AppBarLayout to slide into the FAB after scrolling
+   */
+  public void bindAppBarLayout(@NonNull AppBarLayout v, Runnable onCollapse) {
+    setOnCollapseListener(onCollapse);
+
     v.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
       @Override public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-        collapseFooterLayout();
+        if (verticalOffset != mLastVerticalOffset) {
+          mLastVerticalOffset = verticalOffset;
+          collapseFooterLayout();
+        }
       }
     });
   }
@@ -484,8 +488,24 @@ import io.codetail.animation.ViewAnimationUtils;
    */
   public void collapseFooterLayout() {
     if (mFab != null && isFabExpanded() && !mAnimatingFab) {
+      if (mOnCollapse != null) {
+        mOnCollapse.run();
+      }
+
       slideInFab();
     }
+  }
+
+  public boolean isAnimatingFab() {
+    return mAnimatingFab;
+  }
+
+  public void setOnCollapseListener(Runnable onCollapse) {
+    mOnCollapse = onCollapse;
+  }
+
+  public void setOnExpandListener(Runnable onExpand) {
+    mOnExpand = onExpand;
   }
 }
 
