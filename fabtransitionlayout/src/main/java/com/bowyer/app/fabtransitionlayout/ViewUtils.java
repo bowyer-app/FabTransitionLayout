@@ -6,29 +6,7 @@ import android.view.View;
 /**
  * Created by Bowyer on 2015/07/15.
  */
-public class ViewUtils {
-
-  public static boolean setVisibility(View v, boolean visible) {
-    int visibility;
-    if (visible) {
-      visibility = View.VISIBLE;
-    } else {
-      visibility = View.GONE;
-    }
-    v.setVisibility(visibility);
-    return visible;
-  }
-
-  public static boolean setInVisibility(View v, boolean visible) {
-    int visibility;
-    if (visible) {
-      visibility = View.VISIBLE;
-    } else {
-      visibility = View.INVISIBLE;
-    }
-    v.setVisibility(visibility);
-    return visible;
-  }
+public final class ViewUtils {
 
   public static float centerX(View view) {
     return ViewCompat.getX(view) + view.getWidth() / 2f;
