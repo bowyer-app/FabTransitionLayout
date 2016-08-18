@@ -32,10 +32,8 @@ public class FooterBehavior extends CoordinatorLayout.Behavior<FooterLayout> {
     super.onNestedScroll(coordinatorLayout, child, target, dxConsumed, dyConsumed, dxUnconsumed,
         dyUnconsumed);
 
-    if (dyConsumed > 0) {
-      child.contractFab();
-    } else if (dyConsumed < 0) {
-      child.contractFab();
+    if (dyConsumed != 0) {
+      child.collapseFooterLayout();
     }
   }
 

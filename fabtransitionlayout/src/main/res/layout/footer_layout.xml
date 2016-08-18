@@ -13,9 +13,8 @@
     <LinearLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/toolbar_height"
+        android:layout_height="wrap_content"
         android:elevation="@dimen/elevation"
-        android:gravity="center"
         android:orientation="horizontal"
         android:visibility="invisible"
         />

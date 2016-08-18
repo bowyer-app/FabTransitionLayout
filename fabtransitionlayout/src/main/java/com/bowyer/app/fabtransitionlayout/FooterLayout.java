@@ -5,28 +5,29 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.os.Build;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.v4.view.animation.FastOutLinearInInterpolator;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.AbsListView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import io.codetail.animation.SupportAnimator;
+import android.widget.ListView;
+
+import io.codetail.animation.ViewAnimationUtils;
 
 /**
  * Created by Bowyer on 2015/08/04.
@@ -35,24 +36,35 @@ import io.codetail.animation.SupportAnimator;
 @CoordinatorLayout.DefaultBehavior(FooterBehavior.class) public class FooterLayout
     extends FrameLayout {
 
-  private static final int DEFAULT_ANIMATION_DURATION = 400;
-  private static final int DEFAULT_FAB_SIZE = 56;
+  public static final int DEFAULT_ANIMATION_DURATION = 200;
+  public static final int DEFAULT_FAB_SIZE = 56;
 
-  @IntDef({ FAB_CIRCLE, FAB_EXPAND }) private @interface Fab {
+  @IntDef({ FAB_CIRCLE, FAB_EXPAND }) public @interface Fab {
 
   }
 
-  private static final int FAB_CIRCLE = 0;
-  private static final int FAB_EXPAND = 1;
+  public static final int FAB_CIRCLE = 0;
+  public static final int FAB_EXPAND = 1;
 
-  int mFabType = FAB_CIRCLE;
-  boolean mAnimatingFab = false;
+  private int mFabType = FAB_CIRCLE;
+  private boolean mAnimatingFab = false;
 
-  private LinearLayout mFabExpandLayout;
-  private ImageView mFab;
+  protected LinearLayout mFabExpandLayout;
+  protected ImageView mFab;
 
-  private int animationDuration;
+  private int mAnimationDuration;
   private int mFabSize;
+
+  private boolean mExpandWithAlphaAnim;
+  private float mAnimationFabAlphaFrom = 1f;
+  private float mAnimationFabAlphaTo = 0f;
+
+  private int mLastVerticalOffset;
+  private int mLastRecyclerDy;
+
+  private Runnable mOnCollapse;
+  private Runnable mOnExpand;
+  private Runnable mOnFabClick;
 
   public FooterLayout(Context context) {
     super(context);
@@ -71,7 +83,7 @@ import io.codetail.animation.SupportAnimator;
     loadAttributes(context, attrs);
   }
 
-  private void init() {
+  protected void init() {
     inflate(getContext(), R.layout.footer_layout, this);
     mFabExpandLayout = ((LinearLayout) findViewById(R.id.container));
   }
@@ -89,9 +101,21 @@ import io.codetail.animation.SupportAnimator;
     int containerGravity;
     try {
       setColor(a.getColor(R.styleable.FooterLayout_ft_color, outValue.data));
-      animationDuration =
+
+      mAnimationDuration =
           a.getInteger(R.styleable.FooterLayout_ft_anim_duration, DEFAULT_ANIMATION_DURATION);
+
+      mExpandWithAlphaAnim =
+              a.getBoolean(R.styleable.FooterLayout_ft_expand_with_alpha_anim, mExpandWithAlphaAnim);
+      if (mExpandWithAlphaAnim) {
+        mAnimationFabAlphaFrom =
+                a.getFloat(R.styleable.FooterLayout_ft_anim_fab_alpha_from, mAnimationFabAlphaFrom);
+        mAnimationFabAlphaTo =
+                a.getFloat(R.styleable.FooterLayout_ft_anim_fab_alpha_to, mAnimationFabAlphaTo);
+      }
+
       containerGravity = a.getInteger(R.styleable.FooterLayout_ft_container_gravity, 1);
+
       mFabSize = a.getInteger(R.styleable.FooterLayout_ft_fab_type, DEFAULT_FAB_SIZE);
     } finally {
       a.recycle();
@@ -162,146 +186,106 @@ import io.codetail.animation.SupportAnimator;
     return mFabExpandLayout != null;
   }
 
+  /**
+   * Slide into the Fab
+   */
   public void slideInFab() {
-    if (mAnimatingFab) {
-      return;
-    }
-
     if (isFabExpanded()) {
       contractFab();
-      return;
     }
-
-    ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) mFab.getLayoutParams();
-    float dy = mFab.getHeight() + lp.bottomMargin;
-    if (mFab.getTranslationY() != dy) {
-      return;
-    }
-
-    mAnimatingFab = true;
-    mFab.setVisibility(View.VISIBLE);
-    mFab.animate()
-        .setStartDelay(0)
-        .setDuration(200)
-        .setInterpolator(new FastOutLinearInInterpolator())
-        .translationY(0f)
-        .setListener(new AnimatorListenerAdapter() {
-          @Override public void onAnimationEnd(final Animator animation) {
-            super.onAnimationEnd(animation);
-            mAnimatingFab = false;
-          }
-        })
-        .start();
   }
 
+  /**
+   * Slide into the Fab and hide it
+   */
   public void slideOutFab() {
-    if (mAnimatingFab) {
-      return;
-    }
-
     if (isFabExpanded()) {
       contractFab();
-      return;
     }
-
-    ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) mFab.getLayoutParams();
-    if (mFab.getTranslationY() != 0f) {
-      return;
-    }
-
-    mAnimatingFab = true;
-    mFab.animate()
-        .setStartDelay(0)
-        .setDuration(200)
-        .setInterpolator(new FastOutLinearInInterpolator())
-        .translationY(mFab.getHeight() + lp.bottomMargin)
-        .setListener(new AnimatorListenerAdapter() {
-          @Override public void onAnimationEnd(final Animator animation) {
-            super.onAnimationEnd(animation);
-            mAnimatingFab = false;
-            mFab.setVisibility(View.INVISIBLE);
-          }
-        })
-        .start();
   }
 
+  /**
+   * Expand the fab to your FooterLayout
+   */
   public void expandFab() {
+    if (mFab == null || mAnimatingFab || isFabExpanded()) return;
+
     mFabType = FAB_EXPAND;
 
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-      expandPreLollipop();
-    } else {
-      expandLollipop();
+    expand();
+
+    if (mOnExpand != null) {
+      mOnExpand.run();
     }
   }
 
   public void contractFab() {
-    if (!isFabExpanded()) {
-      return;
-    }
+    if (mFab == null || mAnimatingFab) return;
 
     mFabType = FAB_CIRCLE;
 
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-      contractPreLollipop();
-    } else {
-      contractLollipop();
-    }
+    contract();
   }
 
+  /**
+   * @return true if FAB is hidden and FooterLayout is shown
+   */
   public boolean isFabExpanded() {
     return mFabType == FAB_EXPAND;
   }
 
-  @TargetApi(Build.VERSION_CODES.LOLLIPOP) private void expandLollipop() {
+  protected void expand() {
     mAnimatingFab = true;
 
     // Translation vector for the FAB. Basically move it just below the toolbar.
-    float dx = ViewUtils.centerX(mFabExpandLayout) + getFabSizePx() - ViewUtils.centerX(mFab);
-    float dy = ViewUtils.getRelativeTop(mFabExpandLayout)
-        - ViewUtils.getRelativeTop(mFab)
-        - (mFab.getHeight() - getFabSizePx()) / 2;
+    final float dx = getTranslationDx();
+    final float dy = getTranslationDy();
 
     // Center point on the screen of the FAB after translation. Used as the start point
     // for the expansion animation of the toolbar.
-    int x = (int) (ViewUtils.centerX(mFab) + dx);
-    int y = (mFabExpandLayout.getBottom() - mFabExpandLayout.getTop()) / 2;
+    final int x = (int) (ViewUtils.centerX(mFab) + dx);
+    final int y = (mFabExpandLayout.getBottom() - mFabExpandLayout.getTop()) / 2;
 
     // Start and end radii of the toolbar expand animation.
-    float startRadius = getFabSizePx() / 2;
-    float endRadius = (float) Math.hypot(Math.max(x, mFabExpandLayout.getWidth() - x),
-        Math.max(y, mFabExpandLayout.getHeight() - y));
+    final float startRadius = getFabSizePx() / 2;
+    final float endRadius = (float) Math.hypot(Math.max(x, mFabExpandLayout.getWidth() - x),
+            Math.max(y, mFabExpandLayout.getHeight() - y));
 
     mFabExpandLayout.setAlpha(0f);
     mFabExpandLayout.setVisibility(View.VISIBLE);
 
-    Animator fabSlideXAnim = ObjectAnimator.ofPropertyValuesHolder(mFab,
-        PropertyValuesHolder.ofFloat(View.TRANSLATION_X, 0f, dx));
-    fabSlideXAnim.setDuration(animationDuration / 2);
+    final Animator fabSlideXAnim = ObjectAnimator.ofPropertyValuesHolder(mFab,
+            PropertyValuesHolder.ofFloat(View.TRANSLATION_X, 0f, dx));
+    fabSlideXAnim.setDuration(mAnimationDuration);
 
-    Animator fabSlideYAnim = ObjectAnimator.ofPropertyValuesHolder(mFab,
-        PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, 0f, dy));
-    fabSlideYAnim.setDuration(animationDuration / 2);
+    final Animator fabSlideYAnim = ObjectAnimator.ofPropertyValuesHolder(mFab,
+            PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, 0f, dy));
+    fabSlideYAnim.setDuration(mAnimationDuration);
 
-    Animator toolbarExpandAnim =
-        ViewAnimationUtils.createCircularReveal(mFabExpandLayout, x, y, startRadius, endRadius);
-    toolbarExpandAnim.setStartDelay(animationDuration / 2);
-    toolbarExpandAnim.setDuration(animationDuration / 2);
+    final ObjectAnimator fabAlphaAnim = ObjectAnimator.ofFloat(mFab, View.ALPHA,
+            mExpandWithAlphaAnim ?  mAnimationFabAlphaFrom : 1f,
+            mExpandWithAlphaAnim ? mAnimationFabAlphaTo : 1f);
+
+    final Animator toolbarExpandAnim =
+            ViewAnimationUtils.createCircularReveal(mFabExpandLayout, x, y, startRadius, endRadius);
+    toolbarExpandAnim.setDuration(mAnimationDuration);
 
     // Play All animations together. Interpolators must be added after playTogether()
     // or the won't be used.
-    AnimatorSet animSet = new AnimatorSet();
-    animSet.playTogether(fabSlideXAnim, fabSlideYAnim, toolbarExpandAnim);
+    final AnimatorSet animSet = new AnimatorSet();
+    animSet.playTogether(fabSlideXAnim, fabSlideYAnim, fabAlphaAnim);
+
     fabSlideXAnim.setInterpolator(new AccelerateInterpolator(1.0f));
     fabSlideYAnim.setInterpolator(new DecelerateInterpolator(0.8f));
 
     fabSlideYAnim.addListener(new AnimatorListenerAdapter() {
       @Override public void onAnimationEnd(Animator animation) {
         super.onAnimationEnd(animation);
-        mFab.setVisibility(View.INVISIBLE);
-        mFab.setTranslationX(0f);
-        mFab.setTranslationY(0f);
-        mFab.setAlpha(1f);
+        if (!mExpandWithAlphaAnim) {
+          mFab.setVisibility(INVISIBLE);
+        }
+        // Play toolbar expand animation after slide animations finish.
+        toolbarExpandAnim.start();
       }
     });
 
@@ -313,98 +297,25 @@ import io.codetail.animation.SupportAnimator;
 
       @Override public void onAnimationEnd(Animator animation) {
         super.onAnimationEnd(animation);
-        mAnimatingFab = false;
+
+        onExpandAnimationEnd();
       }
     });
 
+    mFab.setEnabled(false);
     animSet.start();
   }
 
-  private void expandPreLollipop() {
-    mAnimatingFab = true;
-
-    // Translation vector for the FAB. Basically move it just below the toolbar.
-    float dx = ViewUtils.centerX(mFabExpandLayout) + getFabSizePx() - ViewUtils.centerX(mFab);
-    float dy = ViewUtils.getRelativeTop(mFabExpandLayout)
-        - ViewUtils.getRelativeTop(mFab)
-        - (mFab.getHeight() - getFabSizePx()) / 2;
-
-    // Center point on the screen of the FAB after translation. Used as the start point
-    // for the expansion animation of the toolbar.
-    int x = (int) (ViewUtils.centerX(mFab) + dx);
-    int y = (mFabExpandLayout.getBottom() - mFabExpandLayout.getTop()) / 2;
-
-    // Start and end radii of the toolbar expand animation.
-    float startRadius = getFabSizePx() / 2;
-    float endRadius = (float) Math.hypot(Math.max(x, mFabExpandLayout.getWidth() - x),
-        Math.max(y, mFabExpandLayout.getHeight() - y));
-
-    mFabExpandLayout.setAlpha(0f);
-    mFabExpandLayout.setVisibility(View.VISIBLE);
-
-    Animator fabSlideXAnim = ObjectAnimator.ofPropertyValuesHolder(mFab,
-        PropertyValuesHolder.ofFloat(View.TRANSLATION_X, 0f, dx));
-    fabSlideXAnim.setDuration(animationDuration / 2);
-
-    Animator fabSlideYAnim = ObjectAnimator.ofPropertyValuesHolder(mFab,
-        PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, 0f, dy));
-    fabSlideYAnim.setDuration(animationDuration / 2);
-
-    final SupportAnimator toolbarExpandAnim =
-        io.codetail.animation.ViewAnimationUtils.createCircularReveal(mFabExpandLayout, x, y,
-            startRadius, endRadius);
-    toolbarExpandAnim.setDuration(animationDuration / 2);
-
-    // Play slide animations together. Interpolators must be added after playTogether()
-    // or the won't be used.
-    AnimatorSet animSet = new AnimatorSet();
-    animSet.playTogether(fabSlideXAnim, fabSlideYAnim);
-    fabSlideXAnim.setInterpolator(new AccelerateInterpolator(1.0f));
-    fabSlideYAnim.setInterpolator(new DecelerateInterpolator(0.8f));
-
-    fabSlideYAnim.addListener(new AnimatorListenerAdapter() {
-      @Override public void onAnimationEnd(Animator animation) {
-        super.onAnimationEnd(animation);
-        mFab.setAlpha(0f);
-        mFab.setVisibility(View.INVISIBLE);
-        mFab.setTranslationX(0f);
-        mFab.setTranslationY(0f);
-
-        // Play toolbar expand animation after slide animations finish.
-        toolbarExpandAnim.start();
-      }
-    });
-
-    toolbarExpandAnim.addListener(new SupportAnimator.AnimatorListener() {
-      @Override public void onAnimationStart() {
-        mFabExpandLayout.setAlpha(1f);
-      }
-
-      @Override public void onAnimationEnd() {
-        mFab.setAlpha(1f);
-        mAnimatingFab = false;
-      }
-
-      @Override public void onAnimationCancel() {
-
-      }
-
-      @Override public void onAnimationRepeat() {
-
-      }
-    });
-
-    animSet.start();
+  protected void onExpandAnimationEnd() {
+    mAnimatingFab = false;
   }
 
-  @TargetApi(Build.VERSION_CODES.LOLLIPOP) private void contractLollipop() {
+  protected void contract() {
     mAnimatingFab = true;
 
     // Translation vector for the FAB. Basically move it just below the toolbar.
-    float dx = ViewUtils.centerX(mFabExpandLayout) + getFabSizePx() - ViewUtils.centerX(mFab);
-    float dy = ViewUtils.getRelativeTop(mFabExpandLayout)
-        - ViewUtils.getRelativeTop(mFab)
-        - (mFab.getHeight() - getFabSizePx()) / 2;
+    float dx = getTranslationDx();
+    float dy = getTranslationDy();
 
     mFab.setAlpha(0f);
     mFab.setTranslationX(dx);
@@ -419,21 +330,21 @@ import io.codetail.animation.SupportAnimator;
     // Start and end radii of the toolbar contract animation.
     float endRadius = getFabSizePx() / 2;
     float startRadius = (float) Math.hypot(Math.max(x, mFabExpandLayout.getWidth() - x),
-        Math.max(y, mFabExpandLayout.getHeight() - y));
+            Math.max(y, mFabExpandLayout.getHeight() - y));
 
     Animator fabSlideXAnim = ObjectAnimator.ofPropertyValuesHolder(mFab,
-        PropertyValuesHolder.ofFloat(View.TRANSLATION_X, dx, 0f));
-    fabSlideXAnim.setStartDelay(animationDuration / 2);
-    fabSlideXAnim.setDuration(animationDuration / 2);
+            PropertyValuesHolder.ofFloat(View.TRANSLATION_X, dx, 0f));
+    fabSlideXAnim.setStartDelay(mAnimationDuration);
+    fabSlideXAnim.setDuration(mAnimationDuration);
 
     Animator fabSlideYAnim = ObjectAnimator.ofPropertyValuesHolder(mFab,
-        PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, dy, 0f));
-    fabSlideYAnim.setStartDelay(animationDuration / 2);
-    fabSlideYAnim.setDuration(animationDuration / 2);
+            PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, dy, 0f));
+    fabSlideYAnim.setStartDelay(mAnimationDuration);
+    fabSlideYAnim.setDuration(mAnimationDuration);
 
     Animator toolbarContractAnim =
-        ViewAnimationUtils.createCircularReveal(mFabExpandLayout, x, y, startRadius, endRadius);
-    toolbarContractAnim.setDuration(animationDuration / 2);
+            ViewAnimationUtils.createCircularReveal(mFabExpandLayout, x, y, startRadius, endRadius);
+    toolbarContractAnim.setDuration(mAnimationDuration);
 
     // Play All animations together. Interpolators must be added after playTogether()
     // or the won't be used.
@@ -459,90 +370,150 @@ import io.codetail.animation.SupportAnimator;
       }
     });
 
+    mFab.setEnabled(true);
     animSet.start();
   }
 
-  private void contractPreLollipop() {
-    mAnimatingFab = true;
-
-    // Translation vector for the FAB. Basically move it just below the toolbar.
-    float dx = ViewUtils.centerX(mFabExpandLayout) + getFabSizePx() - ViewUtils.centerX(mFab);
-    float dy = ViewUtils.getRelativeTop(mFabExpandLayout)
-        - ViewUtils.getRelativeTop(mFab)
-        - (mFab.getHeight() - getFabSizePx()) / 2;
-
-    mFab.setAlpha(0f);
-    mFab.setTranslationX(dx);
-    mFab.setTranslationY(dy);
-    mFab.setVisibility(View.VISIBLE);
-
-    // Center point on the screen of the FAB before translation. Used as the start point
-    // for the expansion animation of the toolbar.
-    int x = (int) (ViewUtils.centerX(mFab));
-    int y = (mFabExpandLayout.getBottom() - mFabExpandLayout.getTop()) / 2;
-
-    // Start and end radii of the toolbar contract animation.
-    float endRadius = getFabSizePx() / 2;
-    float startRadius = (float) Math.hypot(Math.max(x, mFabExpandLayout.getWidth() - x),
-        Math.max(y, mFabExpandLayout.getHeight() - y));
-
-    Animator fabSlideXAnim = ObjectAnimator.ofPropertyValuesHolder(mFab,
-        PropertyValuesHolder.ofFloat(View.TRANSLATION_X, dx, 0f));
-    fabSlideXAnim.setDuration(animationDuration / 2);
-
-    Animator fabSlideYAnim = ObjectAnimator.ofPropertyValuesHolder(mFab,
-        PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, dy, 0f));
-    fabSlideYAnim.setDuration(animationDuration / 2);
-
-    final SupportAnimator toolbarContractAnim =
-        io.codetail.animation.ViewAnimationUtils.createCircularReveal(mFabExpandLayout, x, y,
-            startRadius, endRadius);
-    toolbarContractAnim.setDuration(animationDuration / 2);
-
-    // Play slide animations together. Interpolators must be added after playTogether()
-    // or the won't be used.
-    final AnimatorSet animSet = new AnimatorSet();
-    animSet.playTogether(fabSlideXAnim, fabSlideYAnim);
-    fabSlideXAnim.setInterpolator(new DecelerateInterpolator(0.8f));
-    fabSlideYAnim.setInterpolator(new AccelerateInterpolator(1.0f));
-
-    toolbarContractAnim.addListener(new SupportAnimator.AnimatorListener() {
-      @Override public void onAnimationStart() {
-
-      }
-
-      @Override public void onAnimationEnd() {
-        mFab.setAlpha(1f);
-        mFabExpandLayout.setAlpha(0f);
-
-        // Play fab animation after contract animation finishes.
-        animSet.start();
-      }
-
-      @Override public void onAnimationCancel() {
-
-      }
-
-      @Override public void onAnimationRepeat() {
-
-      }
-    });
-
-    fabSlideYAnim.addListener(new AnimatorListenerAdapter() {
-      @Override public void onAnimationEnd(Animator animation) {
-        super.onAnimationEnd(animation);
-        mFabExpandLayout.setVisibility(View.INVISIBLE);
-        mFabExpandLayout.setAlpha(1f);
-        mAnimatingFab = false;
-      }
-    });
-
-    toolbarContractAnim.start();
+  protected float getTranslationDx() {
+    return ViewUtils.centerX(mFabExpandLayout) + getFabSizePx() - ViewUtils.centerX(mFab);
   }
 
-  private int getFabSizePx() {
+  protected float getTranslationDy() {
+    return ViewUtils.getRelativeTop(mFabExpandLayout)
+            - ViewUtils.getRelativeTop(mFab)
+            - (mFab.getHeight() - getFabSizePx()) / 2f;
+  }
+
+  protected int getFabSizePx() {
     DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
     return Math.round(mFabSize * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+  }
+
+  /**
+   * Bind a FAB to expand on click
+   */
+  public void bindFab(@NonNull ImageView v) {
+    bindFab(v, null);
+  }
+
+  /**
+   * Bind a FAB to expand on click
+   */
+  public void bindFab(@NonNull ImageView v, Runnable onFabClick) {
+    setFab(v);
+    setOnFabClick(onFabClick);
+
+    mFab.setOnClickListener(new OnClickListener() {
+      @Override public void onClick(View view) {
+        expandFab();
+
+        if (mOnFabClick != null) {
+          mOnFabClick.run();
+        }
+      }
+    });
+  }
+
+  /**
+   * Bind a ListView to slide into the FAB after scrolling
+   */
+  public void bindListView(@NonNull ListView v) {
+    bindListView(v, null);
+  }
+
+  /**
+   * Bind a ListView to slide into the FAB after scrolling
+   */
+  public void bindListView(@NonNull ListView v, Runnable onCollapse) {
+    setOnCollapseListener(onCollapse);
+
+    v.setOnScrollListener(new AbsListView.OnScrollListener() {
+      @Override public void onScrollStateChanged(AbsListView absListView, int scrollState) {
+      }
+
+      @Override
+      public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount,
+          int totalItemCount) {
+        collapseFooterLayout();
+      }
+    });
+  }
+
+  /**
+   * Bind a RecyclerView to slide into the FAB after scrolling
+   */
+  public void bindRecyclerView(@NonNull RecyclerView v) {
+    bindRecyclerView(v, null);
+  }
+
+  /**
+   * Bind a RecyclerView to slide into the FAB after scrolling
+   */
+  public void bindRecyclerView(@NonNull RecyclerView v, Runnable onCollapse) {
+    setOnCollapseListener(onCollapse);
+
+    v.addOnScrollListener(new RecyclerView.OnScrollListener() {
+      @Override public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+        super.onScrolled(recyclerView, dx, dy);
+        if (dy != mLastRecyclerDy) {
+          mLastRecyclerDy = dy;
+          collapseFooterLayout();
+        }
+      }
+    });
+  }
+
+  /**
+   * Bind an AppBarLayout to slide into the FAB after scrolling
+   */
+  public void bindAppBarLayout(@NonNull AppBarLayout v) {
+    bindAppBarLayout(v, null);
+  }
+
+  /**
+   * Bind an AppBarLayout to slide into the FAB after scrolling
+   */
+  public void bindAppBarLayout(@NonNull AppBarLayout v, Runnable onCollapse) {
+    setOnCollapseListener(onCollapse);
+
+    v.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+      @Override public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+        if (verticalOffset != mLastVerticalOffset) {
+          mLastVerticalOffset = verticalOffset;
+          collapseFooterLayout();
+        }
+      }
+    });
+  }
+
+  /**
+   * Collapse the footer layout
+   * if (mFab != null && isFabExpanded() && !mAnimatingFab)
+   */
+  public void collapseFooterLayout() {
+    if (mFab != null && isFabExpanded() && !mAnimatingFab) {
+      slideInFab();
+
+      if (mOnCollapse != null) {
+        mOnCollapse.run();
+      }
+    }
+  }
+
+  public boolean isAnimatingFab() {
+    return mAnimatingFab;
+  }
+
+  public void setOnCollapseListener(Runnable onCollapse) {
+    mOnCollapse = onCollapse;
+  }
+
+  public void setOnExpandListener(Runnable onExpand) {
+    mOnExpand = onExpand;
+  }
+
+  public void setOnFabClick(Runnable onFabClick) {
+    mOnFabClick = onFabClick;
   }
 }
 

@@ -3,6 +3,9 @@
   <declare-styleable name="FooterLayout">
     <attr name="ft_color" format="color"/>
     <attr name="ft_anim_duration" format="integer"/>
+    <attr name="ft_anim_fab_alpha_from" format="float"/><!-- default is 1 -->
+    <attr name="ft_anim_fab_alpha_to" format="float"/><!-- default is 0 -->
+    <attr name="ft_expand_with_alpha_anim" format="boolean"/>
     <attr name="ft_container_gravity" format="enum">
       <enum name="start" value="0"/>
       <enum name="center" value="1"/>
