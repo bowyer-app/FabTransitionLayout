@@ -401,10 +401,11 @@ import io.codetail.animation.ViewAnimationUtils;
     mFab.setOnClickListener(new OnClickListener() {
       @Override public void onClick(View view) {
         if (!isFabExpanded()) {
+          expandFab();
+
           if (mOnExpand != null) {
             mOnExpand.run();
           }
-          expandFab();
         }
       }
     });
@@ -488,11 +489,11 @@ import io.codetail.animation.ViewAnimationUtils;
    */
   public void collapseFooterLayout() {
     if (mFab != null && isFabExpanded() && !mAnimatingFab) {
+      slideInFab();
+
       if (mOnCollapse != null) {
         mOnCollapse.run();
       }
-
-      slideInFab();
     }
   }
 
