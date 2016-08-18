@@ -64,6 +64,7 @@ import io.codetail.animation.ViewAnimationUtils;
 
   private Runnable mOnCollapse;
   private Runnable mOnExpand;
+  private Runnable mOnFabClick;
 
   public FooterLayout(Context context) {
     super(context);
@@ -207,11 +208,15 @@ import io.codetail.animation.ViewAnimationUtils;
    * Expand the fab to your FooterLayout
    */
   public void expandFab() {
-    if (mFab == null || mAnimatingFab) return;
+    if (mFab == null || mAnimatingFab || isFabExpanded()) return;
 
     mFabType = FAB_EXPAND;
 
     expand();
+
+    if (mOnExpand != null) {
+      mOnExpand.run();
+    }
   }
 
   public void contractFab() {
@@ -394,18 +399,16 @@ import io.codetail.animation.ViewAnimationUtils;
   /**
    * Bind a FAB to expand on click
    */
-  public void bindFab(@NonNull ImageView v, Runnable onExpand) {
+  public void bindFab(@NonNull ImageView v, Runnable onFabClick) {
     setFab(v);
-    setOnExpandListener(onExpand);
+    setOnFabClick(onFabClick);
 
     mFab.setOnClickListener(new OnClickListener() {
       @Override public void onClick(View view) {
-        if (!isFabExpanded()) {
-          expandFab();
+        expandFab();
 
-          if (mOnExpand != null) {
-            mOnExpand.run();
-          }
+        if (mOnFabClick != null) {
+          mOnFabClick.run();
         }
       }
     });
@@ -507,6 +510,10 @@ import io.codetail.animation.ViewAnimationUtils;
 
   public void setOnExpandListener(Runnable onExpand) {
     mOnExpand = onExpand;
+  }
+
+  public void setOnFabClick(Runnable onFabClick) {
+    mOnFabClick = onFabClick;
   }
 }
 
