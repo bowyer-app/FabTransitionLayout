@@ -1,35 +1,36 @@
 apply plugin: 'com.android.library'
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 
-  maven {
-    url "https://jitpack.io"
-  }
+    maven {
+        url "https://jitpack.io"
+    }
+    google()
 }
 
 android {
-  compileSdkVersion COMPILE_SDK_VERSION as int
-  buildToolsVersion BUILD_TOOLS_VERSION
+    compileSdkVersion COMPILE_SDK_VERSION as int
+    buildToolsVersion BUILD_TOOLS_VERSION
 
-  defaultConfig {
-    minSdkVersion MIN_SDK_VERSION
-    targetSdkVersion TARGET_SDK_VERSION as int
-    versionCode VERSION_CODE as int
-    versionName VERSION_NAME
-  }
-  buildTypes {
-    release {
-      minifyEnabled false
-      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+    defaultConfig {
+        minSdkVersion MIN_SDK_VERSION
+        targetSdkVersion TARGET_SDK_VERSION as int
+        versionCode VERSION_CODE as int
+        versionName VERSION_NAME
     }
-  }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
 }
 
 
 dependencies {
-  compile rootProject.ext.androidSupportAppCompatV7Lib
-  compile 'com.github.ozodrukh:CircularReveal:1.3.1'
-  compile 'com.android.support:design:23.4.0'
+    compile 'com.android.support:appcompat-v7:26.1.0'
+    compile 'com.github.ozodrukh:CircularReveal:2.1.0'
+    compile 'com.android.support:design:26.1.0'
 }
 apply from: 'bintray-publish.gradle'
